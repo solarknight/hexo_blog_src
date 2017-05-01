@@ -36,32 +36,52 @@ Note: You may not slant the container and n is at least 2.
     }
 ```
 
-## 7. [Reverse Integer](https://leetcode.com/problems/reverse-integer/#/description)
+## 12. [Integer to Roman](https://leetcode.com/problems/integer-to-roman/#/description)
 
 #### Description
 
-Reverse digits of an integer.
-Example1: x = 123, return 321
-Example2: x = -123, return -321
-
-The input is assumed to be a 32-bit signed integer. Your function should return 0 when the reversed integer overflows.
+Given an integer, convert it to a roman numeral.
+Input is guaranteed to be within the range from 1 to 3999.
 
 #### Analysis
 
-这道题主要考察对边界的处理。最简单的方式是在转换过程中，使用一个64-bit的数保存中间结果，在返回前判断其是否超过32-bit的边界。
-反转操作可参考下式：
-`r, x = (10 * r + x % 10), x / 10 while x != 0`
+首先要知道各个罗马数字，以及它们与十进制整数之间的转换关系。详细可见[维基百科](https://zh.wikipedia.org/wiki/%E7%BD%97%E9%A9%AC%E6%95%B0%E5%AD%97)。
+罗马数字共有7个，即Ⅰ（1）、Ⅴ（5）、Ⅹ（10）、Ⅼ（50）、Ⅽ（100）、Ⅾ（500）和Ⅿ（1000）。按照下述的规则可以表示任意正整数。需要注意的是罗马数字中没有“0”，与进位制无关。
+  - 重复数次：一个罗马数字重复几次，就表示这个数的几倍。
+  - 右加左减：
+    - 在较大的罗马数字的右边记上较小的罗马数字，表示大数字加小数字。
+    - 在较大的罗马数字的左边记上较小的罗马数字，表示大数字减小数字。
+    - 左减的数字有限制，仅限于I、X、C。比如45不可以写成VL，只能是XLV
+    - 但是，左减时不可跨越一个位值。比如，99不可以用IC表示，而是用XCIX表示。（等同于阿拉伯数字每位数字分别表示。）
+    - 左减数字必须为一位，比如8写成VIII，而非IIX。
+    - 右加数字不可连续超过三位，比如14写成XIV，而非XIIII。（见下方“数码限制”一项。） 
+  - 加线乘千: 
+    - 在罗马数字的上方加上一条横线或者加上下标的Ⅿ，表示将这个数乘以1000，即是原数的1000倍。
+    - 同理，如果上方有两条横线，即是原数的1000000倍。
+  - 数码限制: 同一数码最多只能连续出现三次，如40不可表示为XXXX，而要表示为XL。
+
+由于输入已经限制为了[1, 3999]，因此不需考虑加线乘千的规则。由于每一位的取值都是有限个，因此完全可以记录一个常量表，然后使用查表的方式来解决。
+如果不想记录每一位所有数字，也可以保存一个所选范围内左减数字的全量表，这样只需处理右加的情况即可。
 
 #### Answer
 
 ```java
-  public int reverse(int x) {
-    long r = 0;
-    for (; x != 0; x /= 10) {
-      r = 10 * r + x % 10;
+    private static final String[] M = {"", "M", "MM", "MMM"};
+    private static final String[] C = {"", "C", "CC", "CCC", "CD", "D", "DC", "DCC", "DCCC", "CM"};
+    private static final String[] X = {"", "X", "XX", "XXX", "XL", "L", "LX", "LXX", "LXXX", "XC"};
+    private static final String[] I = {"", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"};
+    
+    public String intToRoman(int num) {
+        if (num < 10) {
+          return I[num];
+        } else if (num < 100) {
+          return X[num / 10] + I[num % 10];
+        } else if (num < 1000) {
+          return C[num / 100] + X[(num % 100) / 10] + I[num % 10];
+        } else {
+          return M[num / 1000] + C[(num % 1000) / 100] + X[(num % 100) / 10] + I[num % 10];
+        }
     }
-    return r > Integer.MAX_VALUE || r < Integer.MIN_VALUE ? 0 : (int) r;
-  }
 ```
 
 ## 8. [String to Integer (atoi)](https://leetcode.com/problems/string-to-integer-atoi/#/description)
