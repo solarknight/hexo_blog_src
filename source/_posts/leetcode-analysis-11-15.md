@@ -84,55 +84,51 @@ Input is guaranteed to be within the range from 1 to 3999.
     }
 ```
 
-## 8. [String to Integer (atoi)](https://leetcode.com/problems/string-to-integer-atoi/#/description)
+## 13. [Roman to Integer](https://leetcode.com/problems/roman-to-integer/#/description)
 
 #### Description
 
-Implement atoi to convert a string to an integer.
-
-Requirements for atoi:
-The function first discards as many whitespace characters as necessary until the first non-whitespace character is found. Then, starting from this character, takes an optional initial plus or minus sign followed by as many numerical digits as possible, and interprets them as a numerical value.
-The string can contain additional characters after those that form the integral number, which are ignored and have no effect on the behavior of this function.
-If the first sequence of non-whitespace characters in str is not a valid integral number, or if no such sequence exists because either str is empty or it contains only whitespace characters, no conversion is performed.
-If no valid conversion could be performed, a zero value is returned. If the correct value is out of the range of representable values, INT_MAX (2147483647) or INT_MIN (-2147483648) is returned.
+Given a roman numeral, convert it to an integer.
+Input is guaranteed to be within the range from 1 to 3999.
 
 #### Analysis
 
-不看提示很难跑过所有Test case的一道题。将字符串转换为整数的操作和上一题接近，都是在遍历过程中，将中间结果乘以10，再加上新的数字。
-和上一题不同的是，即使使用64bit-int来保存中间结果，也有可能发生越界的问题。因此最好的处理方式是在遍历过程中加以判断。
+由上一题可知罗马数字和十进制数之间的转换规则。这里主要考察左减右加的转换：当左边的数字小于右边时，对应的大小为右边的数字减去左边的数字。当左边的数字大于等于右边时，正常加和即可。
 
 #### Answer
 
 ```java
-  public int myAtoi(String str) {
-    if (str == null || str.length() == 0) {
+  public int romanToInt(String s) {
+    if (s.length() == 0) {
       return 0;
     }
-    char[] c = str.toCharArray();
-    int idx = 0, flag = 1;
-    long sum = 0;
-    while (c[idx] == ' ') {
-      idx++;
+    int sum = 0, last = 0, cur = 0;
+    for (int i = 0; i < s.length(); i++) {
+      cur = convert(s.charAt(i));
+      sum += last >= cur ? cur : cur - 2 * last;
+      last = cur;
     }
+    return sum;
+  }
 
-    if (c[idx] == '-') {
-      flag = -1;
-      idx++;
-    } else if (c[idx] == '+') {
-      idx++;
+  private int convert(char c) {
+    switch (c) {
+      case 'I':
+        return 1;
+      case 'V':
+        return 5;
+      case 'X':
+        return 10;
+      case 'L':
+        return 50;
+      case 'C':
+        return 100;
+      case 'D':
+        return 500;
+      case 'M':
+        return 1000;
     }
-
-    for (; idx < c.length; idx++) {
-      int t = c[idx] - '0';
-      if (t < 0 || t > 9) {
-        break;
-      }
-      sum = sum * 10 + t;
-      if (sum > Integer.MAX_VALUE) {
-        return flag == 1 ? Integer.MAX_VALUE : Integer.MIN_VALUE;
-      }
-    }
-    return (int) sum * flag;
+    return 0;
   }
 ```
 
