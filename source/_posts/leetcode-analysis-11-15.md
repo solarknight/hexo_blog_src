@@ -132,35 +132,30 @@ Input is guaranteed to be within the range from 1 to 3999.
   }
 ```
 
-## 9. [Palindrome Number](https://leetcode.com/problems/palindrome-number/#/description)
+## 14. [Longest Common Prefix](https://leetcode.com/problems/longest-common-prefix/#/description)
 
 #### Description
 
-Determine whether an integer is a palindrome. Do this without extra space.
+Write a function to find the longest common prefix string amongst an array of strings.
 
 #### Analysis
 
-回文串是对称的，这一特性放到数字上，也就意味着对称轴一侧的数字反转后和另一侧相等。参考上面的数字反转算法，再对边界条件做处理，即可得到答案。
-回文串长度为奇数和偶数时程序上判断条件不同，为奇数时要对较大的部分除以10再进行比较。
+两种思路：
+- 从第一个字符开始，逐一比较所有字符串，直到有不匹配的（字符不相同或者超出长度）
+- 求出第0个和第1个字符串的公共前缀，再依次和其他字符串求公共前缀
+第二种方法可以较多利用语言原生API，代码较为简洁。
 
 #### Answer
 
 ```java
-  public boolean isPalindrome(int x) {
-    if (x < 0) {
-      return false;
-    }
-    if (x >= 0 && x < 10) {
-      return true;
-    }
-    if (x % 10 == 0) {
-      return false;
-    }
-    int rev = 0;
-    for (; x > rev; x /= 10) {
-      rev = 10 * rev + x % 10;
-    }
-    return x == rev || x == rev / 10;
+  public String longestCommonPrefix(String[] strs) {
+      if (strs.length == 0) return "";
+      String pre = strs[0];
+      for (int i = 1; i < strs.length; i++) {
+          while (strs[i].indexOf(pre) != 0)
+              pre = pre.substring(0, pre.length() - 1);
+      }
+      return pre;
   }
 ```
 
