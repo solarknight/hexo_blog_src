@@ -159,66 +159,61 @@ Write a function to find the longest common prefix string amongst an array of st
   }
 ```
 
-## 10. [Regular Expression Matching](https://leetcode.com/problems/regular-expression-matching/#/description)
+## 15. [3Sum](https://leetcode.com/problems/3sum/#/description)
 
 #### Description
 
-Implement regular expression matching with support for `'.'` and `'*'`.
+Given an array S of n integers, are there elements a, b, c in S such that a + b + c = 0? Find all unique triplets in the array which gives the sum of zero.
+Note: The solution set must not contain duplicate triplets.
 ```
-'.' Matches any single character.
-'*' Matches zero or more of the preceding element.
+For example, given array S = [-1, 0, 1, 2, -1, -4],
 
-The matching should cover the entire input string (not partial).
-
-The function prototype should be:
-bool isMatch(const char *s, const char *p)
-
-Some examples:
-isMatch("aa","a") → false
-isMatch("aa","aa") → true
-isMatch("aaa","aa") → false
-isMatch("aa", "a*") → true
-isMatch("aa", ".*") → true
-isMatch("ab", ".*") → true
-isMatch("aab", "c*a*b") → true
+A solution set is:
+[
+  [-1, 0, 1],
+  [-1, -1, 2]
+]
 ```
 
 #### Analysis
 
-s[0..i]和p[0..j]是否匹配，取决于之前字符串的匹配情况，因此这一题比较适合用动态规划来解决。构建一个长度为`bool[len(s) + 1][len(p) + 1]`的数组，以减少对边界条件的处理。
-初始化时，`dp[0][0]`处为true，其余元素为false。然后判断`dp[0][j](1 < j <= len(p))`时的值。
-对于`dp[i][j](1 <= i <= len(s), 1 <= j <= len(p))`，如果`p[j] == s[i] || p[j] == '.'`，则有`dp[i + 1][j + 1] = dp[i][j]`。
-如果`p[j] == '*'`，又需要对`p[j - 1] == s[i] || p[j - 1] == '.'`及不满足的情况分别考虑。
+前面我们已经解决过`Two sum`的问题，但这一题还是有些不同。这次我们需要给出所有可行解的全集，并且不能重复。
+在固定三个数中的一个数之后，问题可以转化为在剩余的数字中求两数之和的问题。再加上这个问题的条件，合理的方式是对数组进行排序，然后再进行处理。
+当数组排序后，遍历过程中可以跳过重复的相邻元素，来达到简化计算和去重的目的。
 
 #### Answer
 
 ```java
-  public boolean isMatch(String s, String p) {
-    boolean[][] dp = new boolean[s.length() + 1][p.length() + 1];
-    dp[0][0] = true;
-    for (int i = 1; i < p.length(); i++) {
-      dp[0][i + 1] = p.charAt(i) == '*' && dp[0][i - 1];
+  public List<List<Integer>> threeSum(int[] nums) {
+    List<List<Integer>> list = new ArrayList<List<Integer>>();
+    if (nums.length == 0 || nums.length < 3) {
+      return list;
     }
-
-    for (int i = 0; i < s.length(); i++) {
-      for (int j = 0; j < p.length(); j++) {
-        if (p.charAt(j) == s.charAt(i)) {
-          dp[i + 1][j + 1] = dp[i][j];
-        }
-        if (p.charAt(j) == '.') {
-          dp[i + 1][j + 1] = dp[i][j];
-        }
-        if (p.charAt(j) == '*') {
-          if (p.charAt(j - 1) != s.charAt(i) && p.charAt(j - 1) != '.') {
-            dp[i + 1][j + 1] = dp[i + 1][j - 1];
-          } else {
-            // zero || one || multi (count >= 2)
-            dp[i + 1][j + 1] = dp[i + 1][j - 1] || dp[i + 1][j] || dp[i][j + 1];
+    Arrays.sort(nums);
+    for (int i = 0; i < nums.length - 2; i++) {
+      if (i != 0 && nums[i] == nums[i - 1]) {
+        continue;
+      }
+      int tar = -nums[i], j = i + 1, k = nums.length - 1;
+      while (j < k) {
+        if (nums[j] + nums[k] == tar) {
+          list.add(Arrays.asList(nums[i], nums[j], nums[k]));
+          j++;
+          k--;
+          while (j < k && nums[j] == nums[j - 1]) {
+            j++;
           }
+          while (j < k && nums[k] == nums[k + 1]) {
+            k--;
+          }
+        } else if (nums[j] + nums[k] < tar) {
+          j++;
+        } else {
+          k--;
         }
       }
     }
-    return dp[s.length()][p.length()];
+    return list;
   }
 ```
 
