@@ -186,7 +186,7 @@ A solution set is:
 ```java
   public List<List<Integer>> threeSum(int[] nums) {
     List<List<Integer>> list = new ArrayList<List<Integer>>();
-    if (nums.length == 0 || nums.length < 3) {
+    if (nums == null || nums.length < 3) {
       return list;
     }
     Arrays.sort(nums);
@@ -216,4 +216,3 @@ A solution set is:
     return list;
   }
 ```
-
