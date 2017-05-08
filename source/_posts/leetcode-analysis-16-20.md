@@ -101,135 +101,144 @@ Output: ["ad", "ae", "af", "bd", "be", "bf", "cd", "ce", "cf"].
     }
 ```
 
-## 13. [Roman to Integer](https://leetcode.com/problems/roman-to-integer/#/description)
+## 18. [4Sum](https://leetcode.com/problems/4sum/#/description)
 
 #### Description
 
-Given a roman numeral, convert it to an integer.
-Input is guaranteed to be within the range from 1 to 3999.
-
-#### Analysis
-
-由上一题可知罗马数字和十进制数之间的转换规则。这里主要考察左减右加的转换：当左边的数字小于右边时，对应的大小为右边的数字减去左边的数字。当左边的数字大于等于右边时，正常加和即可。
-
-#### Answer
-
-```java
-  public int romanToInt(String s) {
-    if (s.length() == 0) {
-      return 0;
-    }
-    int sum = 0, last = 0, cur = 0;
-    for (int i = 0; i < s.length(); i++) {
-      cur = convert(s.charAt(i));
-      sum += last >= cur ? cur : cur - 2 * last;
-      last = cur;
-    }
-    return sum;
-  }
-
-  private int convert(char c) {
-    switch (c) {
-      case 'I':
-        return 1;
-      case 'V':
-        return 5;
-      case 'X':
-        return 10;
-      case 'L':
-        return 50;
-      case 'C':
-        return 100;
-      case 'D':
-        return 500;
-      case 'M':
-        return 1000;
-    }
-    return 0;
-  }
+Given an array S of n integers, are there elements a, b, c, and d in S such that a + b + c + d = target? Find all unique quadruplets in the array which gives the sum of target.
+**Note**: The solution set must not contain duplicate quadruplets.
 ```
-
-## 14. [Longest Common Prefix](https://leetcode.com/problems/longest-common-prefix/#/description)
-
-#### Description
-
-Write a function to find the longest common prefix string amongst an array of strings.
-
-#### Analysis
-
-两种思路：
-- 从第一个字符开始，逐一比较所有字符串，直到有不匹配的（字符不相同或者超出长度）
-- 求出第0个和第1个字符串的公共前缀，再依次和其他字符串求公共前缀
-第二种方法可以较多利用语言原生API，代码较为简洁。
-
-#### Answer
-
-```java
-  public String longestCommonPrefix(String[] strs) {
-      if (strs.length == 0) return "";
-      String pre = strs[0];
-      for (int i = 1; i < strs.length; i++) {
-          while (strs[i].indexOf(pre) != 0)
-              pre = pre.substring(0, pre.length() - 1);
-      }
-      return pre;
-  }
-```
-
-## 15. [3Sum](https://leetcode.com/problems/3sum/#/description)
-
-#### Description
-
-Given an array S of n integers, are there elements a, b, c in S such that a + b + c = 0? Find all unique triplets in the array which gives the sum of zero.
-Note: The solution set must not contain duplicate triplets.
-```
-For example, given array S = [-1, 0, 1, 2, -1, -4],
-
+For example, given array S = [1, 0, -1, 0, -2, 2], and target = 0.
 A solution set is:
 [
-  [-1, 0, 1],
-  [-1, -1, 2]
+  [-1,  0, 0, 1],
+  [-2, -1, 1, 2],
+  [-2,  0, 0, 2]
 ]
 ```
 
 #### Analysis
 
-前面我们已经解决过`Two sum`的问题，但这一题还是有些不同。这次我们需要给出所有可行解的全集，并且不能重复。
-在固定三个数中的一个数之后，问题可以转化为在剩余的数字中求两数之和的问题。再加上这个问题的条件，合理的方式是对数组进行排序，然后再进行处理。
-当数组排序后，遍历过程中可以跳过重复的相邻元素，来达到简化计算和去重的目的。
+和之前3Sum很类似的一道题，同样有多个可能解，同样要求对解集去重。参考3Sum的解法，首先对数组排序，然后从左边选定第一个元素，问题即转化为了3Sum的问题。
 
 #### Answer
 
 ```java
-  public List<List<Integer>> threeSum(int[] nums) {
-    List<List<Integer>> list = new ArrayList<List<Integer>>();
-    if (nums == null || nums.length < 3) {
-      return list;
+  public List<List<Integer>> fourSum(int[] nums, int target) {
+    List<List<Integer>> res = new ArrayList<>();
+    if (nums == null || nums.length < 4) {
+      return res;
     }
     Arrays.sort(nums);
-    for (int i = 0; i < nums.length - 2; i++) {
+    for (int i = 0; i < nums.length - 3; i++) {
       if (i != 0 && nums[i] == nums[i - 1]) {
         continue;
       }
-      int tar = -nums[i], j = i + 1, k = nums.length - 1;
-      while (j < k) {
-        if (nums[j] + nums[k] == tar) {
-          list.add(Arrays.asList(nums[i], nums[j], nums[k]));
-          j++;
-          k--;
-          while (j < k && nums[j] == nums[j - 1]) {
-            j++;
+      for (int j = i + 1; j < nums.length - 2; j++) {
+        if (j != i + 1 && nums[j] == nums[j - 1]) {
+          continue;
+        }
+        int k = j + 1, l = nums.length - 1, tar = target - nums[i] - nums[j];
+        while (k < l) {
+          if (nums[k] + nums[l] == tar) {
+            res.add(Arrays.asList(nums[i], nums[j], nums[k], nums[l]));
+            k++;
+            l--;
+            while (k < l && nums[k] == nums[k - 1]) {
+              k++;
+            }
+            while (k < l && nums[l] == nums[l + 1]) {
+              l--;
+            }
+          } else if (nums[k] + nums[l] < tar) {
+            k++;
+          } else {
+            l--;
           }
-          while (j < k && nums[k] == nums[k + 1]) {
-            k--;
-          }
-        } else if (nums[j] + nums[k] < tar) {
-          j++;
-        } else {
-          k--;
         }
       }
     }
-    return list;
+    return res;
+  }
+```
+
+## 19. [Remove Nth Node From End of List](https://leetcode.com/problems/remove-nth-node-from-end-of-list/#/description)
+
+#### Description
+
+Given a linked list, remove the nth node from the end of list and return its head.
+For example,
+```
+   Given linked list: 1->2->3->4->5, and n = 2.
+   After removing the second node from the end, the linked list becomes 1->2->3->5.
+```
+**Note**:
+Given n will always be valid.
+Try to do this in one pass.
+
+#### Analysis
+
+参考判断单链表是否有环问题的解决思路。使用两个指针，其中一个指针比另一个多走`n + 1`步。然后同时移动两个指针，当前面那个指向`null`时，后面的指针正处在删除节点的合适位置。
+注意当删除节点是首节点时，需要返回下一个节点作为首节点。这里可以采用初始化一个冗余节点作为首节点的方式，规避对于边界条件的处理。
+
+#### Answer
+
+```java
+  public ListNode removeNthFromEnd(ListNode head, int n) {
+    if (head.next == null) {
+      return null;
+    }
+    ListNode dummy = new ListNode(0), cur1 = dummy, cur2 = dummy;
+    dummy.next = head;
+    for (int i = 0; i <= n; i++) {
+      cur2 = cur2.next;
+    }
+    while (cur2 != null) {
+      cur1 = cur1.next;
+      cur2 = cur2.next;
+    }
+    cur1.next = cur1.next.next;
+    return dummy.next;
+  }
+```
+
+## 20. [Valid Parentheses](https://leetcode.com/problems/valid-parentheses/#/description)
+
+#### Description
+
+Given a string containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid.
+The brackets must close in the correct order, "()" and "()[]{}" are all valid but "(]" and "([)]" are not.
+
+#### Analysis
+
+参考四则运算类编程问题，这类题目适合使用栈来处理。通过在push时放入对应的匹配元素，可以简化条件处理。如果在放入元素时，无法和栈顶元素匹配，并且非`(`、`[`、`{`，则可以直接返回false。
+
+#### Answer
+
+```java
+  public boolean isValid(String s) {
+    if (s.length() == 0) {
+      return true;
+    }
+    if (s.length() == 1) {
+      return false;
+    }
+    Stack<Character> stack = new Stack<>();
+    for (char c : s.toCharArray()) {
+      if (stack.size() != 0 && stack.peek() == c) {
+        stack.pop();
+        continue;
+      }
+      if (c == '(') {
+        stack.push(')');
+      } else if (c == '[') {
+        stack.push(']');
+      } else if (c == '{') {
+        stack.push('}');
+      } else {
+        return false;
+      }
+    }
+    return stack.size() == 0;
   }
 ```
